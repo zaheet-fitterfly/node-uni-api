@@ -59,6 +59,8 @@ const Userx = {
                     req.body.level = "2";
                     req.body.Uni = decodedx.uni;
 
+                    req.body.roleId = req.userz.id;
+
                     console.log("decodexxx----", decodedx);
                     req.body.password = Helper.hashPassword(req.body.password);;
 
@@ -75,7 +77,8 @@ const Userx = {
 
                             return response(res, 200, null, {
                                 name: data.name,
-                                email: data.email
+                                email: data.email,
+
                             });
                         })
                         .catch(err => {
@@ -93,6 +96,11 @@ const Userx = {
 
     // Retrieve all Tutorials from the database.
     async findAll(req, res) {
+        console.log("session", req.session.isLoggedin);
+        const session = req.session.isLoggedin
+        if (session != true) {
+            return res.send("<h1>session timeout</h1>");
+        }
         // throw new Error('could not get users');
 
         const token = req.header('x-auth-token');
@@ -107,7 +115,18 @@ const Userx = {
                 }
             } : null;
 
-            User.findAll({ where: condition })
+            User.findAll({
+                    where: name,
+                    // attributes: {
+                    //     exclude: ['createdAt', 'updatedAt', 'password']
+                    // },
+                    attributes: ['name', 'email'],
+                    include: {
+                        model: db.roles,
+                        attributes: ['name']
+                    },
+                    where: { Uni: name }
+                })
                 .then(data => {
                     res.send(data);
                 })
@@ -117,15 +136,23 @@ const Userx = {
                     })
                 })
         } else {
-            const name = decodedx.roleId;
+            const name = decodedx._id;
             console.log(name);
-            var condition = name ? {
-                belongs_to: {
-                    [Op.iLike]: `%${name}%`
-                }
-            } : null;
+            // var condition = name ? {
+            //     roleId: {
+            //         [Op.iLike]: `%${name}%`
+            //     }
+            // } : null;
 
-            User.findAll({ where: condition })
+            User.findAll({
+                    include: db.roles,
+                    where: { roleId: name },
+                    attributes: ['name', 'email'],
+                    include: {
+                        model: db.roles,
+                        attributes: ['name']
+                    },
+                })
                 .then(data => {
                     res.send(data);
                 })
@@ -149,7 +176,7 @@ const Userx = {
         if (decodedx._id != id && decodedx.roleId != 0) {
             return res.send("not access");
         }
-        User.findByPk(id)
+        User.findByPk({ include: User })
             .then(data => {
                 console.log("findon data", data.id);
                 // if(data.id === id){}

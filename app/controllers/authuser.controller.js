@@ -9,6 +9,17 @@ const response = require('../helpers/response');
 
 const validation = require("../helpers/validator");
 const { roles, users } = require("../models");
+
+
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(sendgridTransport({
+    auth: {
+        api_key: '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'
+    }
+}));
+
 // const { body, validationResult } = require('express-validator')
 
 
@@ -33,6 +44,7 @@ const Rolex = {
                         data: err
                     });
             } else {
+                console.log(tokex);
                 db.sequelize.transaction(async(t1) => {
 
                     const user = await User.findOne({
@@ -57,11 +69,16 @@ const Rolex = {
                     console.log("user----", users);
                     const token = jwt.sign({ _id: user.id, roleId: user.level, belongs_to: user.belongs_to }, config.secret, { expiresIn: 86400 });
                     console.log(token);
-
-                    return response(res, 200, null, {
+                    response(res, 200, null, {
                         token: token,
                     });
+                    return transporter.sendMail({
+                        to: req.body.email,
+                        from: '16beitg063@gmail.com',
+                        subject: 'signined uniapi',
+                        html: `<h1>hello ${req.body.email} , you just signed in</h1>`,
 
+                    });
                 });
 
             }

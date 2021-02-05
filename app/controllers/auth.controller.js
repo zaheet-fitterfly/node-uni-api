@@ -9,7 +9,9 @@ const response = require('../helpers/response');
 
 const validation = require("../helpers/validator");
 const { roles, users } = require("../models");
+
 // const { body, validationResult } = require('express-validator')
+
 
 
 // Create and Save a new Tutorial
@@ -21,6 +23,8 @@ const Rolex = {
 
             "password": "required|string"
         }
+
+
 
 
 
@@ -51,6 +55,7 @@ const Rolex = {
                     if (!passwordIsValid) {
                         return response(res, 404, "Invalid access. Please check rolename and Password.");
                     }
+                    req.session.isLoggedin = true;
 
                     // const validPassword = await bcrypt.compare(req.body.password, role.password);
                     // if (!validPassword) return res.status(400).send("invalid email or pwd");
@@ -58,6 +63,8 @@ const Rolex = {
                     console.log("role----", roles);
                     const token = jwt.sign({ _id: role.id, roleId: role.roleId, uni: role.Uni, level: role.level }, config.secret, { expiresIn: 86400 });
                     console.log(token);
+
+
 
                     return response(res, 200, null, {
                         token: token,

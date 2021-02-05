@@ -15,8 +15,8 @@ module.exports = app => {
     const { body } = require('express-validator')
     app.post("/admin/signin", auth.signin);
     app.post("/user/signin", authuser.signin);
-    app.post("/users/", users.create);
-    app.post("/users/:id", [authJwt.verifyToken, superadmin], users.create);
+    app.post("/users/", [authJwt.roleIdFn], users.create);
+    app.post("/users/:id", [authJwt.verifyToken, authJwt.roleIdFn, superadmin], users.create);
 
     app.post("/roles/:role", roles.create);
 
