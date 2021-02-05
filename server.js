@@ -52,7 +52,7 @@ db.sequelize.sync();
 
 // simple route
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to zaheet node-api." });
+    res.json({ message: "Welcome to zaheet node-api ." });
 });
 app.get("/debug-sentry", function mainHandler(req, res) {
     throw new Error("My first Sentry error!");
